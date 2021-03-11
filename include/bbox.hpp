@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <opencv2/core.hpp>
@@ -84,4 +83,55 @@ Rectangle min_bbox(const std::vector<cv::Point> points) {
     }
 
     return areas.begin()->second;
+}
+
+Rectangle get_bbox(const std::vector<cv::Point> points) {
+    auto convex_hull = quickhull(points);
+
+    // Map with visited points to prevent repetitive pairs
+    std::map<int, bool> visited_points;
+    for (std::size_t i = 0; i < convex_hull.size(); i++) {
+        visited_points.insert({i, false});
+    }
+
+    // Calculate the pair of points with the longest distance
+    std::map<double, std::pair<cv::Point, cv::Point>, std::greater<int>> 
+        distances;
+    for (std::size_t i = 0; i < convex_hull.size(); i++) {
+        for (std::size_t j = 0; j < convex_hull.size(); j++) {
+            if ((i != j) && !visited_points.at(j)) {
+                auto p1 = convex_hull.at(i);
+                auto p2 = convex_hull.at(j);
+                auto distance = get_distance(p1, p2);
+                distances.insert({
+                    distance,
+                    {p1, p2}});
+            }
+        }
+        visited_points.at(i) = true;
+    }
+    auto longest_pair = distances.begin()->second;
+    
+    // Get the third corner with the smallest angle (near 90°)
+    std::map<double, cv::Point> angles;
+    auto p1 = longest_pair.first;
+    auto p2 = longest_pair.second;
+    for (auto p3 : convex_hull) {
+        if (p3 != p1 && p3 != p2) {
+            auto v1 = p1 - p3;
+            auto v2 = p2 - p3;
+            auto angle = get_angle_vectors(v1, v2);
+            angles.insert({angle, p3});
+        }
+    }
+    auto p3 = angles.begin()->second;
+    cv::Point p4 = p1 + p2 - p3; 
+
+    Rectangle bbox;
+    bbox.top_left = p1;
+    bbox.top_right = p3;
+    bbox.bottom_left = p4;
+    bbox.bottom_right = p2;
+
+    return bbox;
 }

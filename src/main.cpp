@@ -18,12 +18,12 @@ int main() {
     cv::Mat image = cv::Mat(cv::Size(700, 700), CV_8UC3, cv::Scalar(255, 255, 255));
 
     std::vector<cv::Point> points;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
         cv::Point new_point(distr(gen), distr(gen));
         points.push_back(new_point);
     }
 
-    auto clusters = k_means(points, 4, 10);
+    auto clusters = k_means(points, 2, 10);
     for (auto cluster : clusters) {
         for (auto point : cluster.second) {
             cv::circle(image, point, 2, cv::Scalar(0, 0, 255));

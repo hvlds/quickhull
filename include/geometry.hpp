@@ -113,3 +113,19 @@ std::vector<cv::Point> get_ordered_points(const std::vector<cv::Point> points) {
 
     return ordered_points;
 }
+
+double get_distance(cv::Point p1, cv::Point p2) {
+    double distance = std::sqrt(
+        std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2));
+
+    return distance;
+}
+
+double get_angle_vectors(cv::Point v1, cv::Point v2) {
+    double m1 = std::sqrt(std::pow(v1.x, 2) + std::pow(v1.y, 2));
+    double m2 = std::sqrt(std::pow(v2.x, 2) + std::pow(v2.y, 2));
+    double angle = std::acos(
+        (v1.x * v2.x + v1.y * v2.y) / (m1 * m2));
+        
+    return angle;
+}
